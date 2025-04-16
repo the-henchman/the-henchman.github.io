@@ -1,0 +1,20 @@
+        The Plaine Sundial app was written by<br>
+        <a href="javascript:void(0)">The Mason's Henchman</a><br>
+        It is not perfect, but seems to produce some usable results. The Henchman will publish the source for this app,
+        whenever he thinks it is presentable. During years of programming, the Henchman relied heavily on the<br>
+        <a href='https://www.jetbrains.com/idea/' target='_blank'>IntelliJ IDEA (community edition)</a><br>
+        and its ability to 'transpile' kotlin into JavaScript. He frequently visited<br>
+        <a href='https://www.wikiwand.com/en/Conic_section' target='_blank'>Wikipedia</a><br>
+        for the maths and often had a peek at<br>
+        <a href='https://stackoverflow.com/questions/32915485/how-to-prevent-unicode-characters-from-rendering-as-emoji-in-html-from-javascrip' target='_blank'>stackoverflow</a><br>
+        for the programming.<br>
+        He visited <a href='https://www.w3schools.com/'>W3Schools</a> a lot to make things work, though understanding often failed him<br><br>
+        He also took the liberty to include the following libraries in this app:<br>
+        <a href="https://github.com/kotlincook/complex-numbers" target="_blank">kotlincook/complex-numbers  </a>
+         by Jörg Vollmer. A small library for the programming language Kotlin to work comfortably with complex numbers. GNU GENERAL PUBLIC LICENSE<br>
+        <a href="https://github.com/stleary/JSON-java" target="_blank">stleary/JSON-java </a>
+         by Sean Leary. JSON is a light-weight language-independent data interchange format. Public Domain<br>
+        <a href="https://github.com/ionspin/kotlin-multiplatform-bignum" target="_blank">ionspin/kotlin-multiplatform-bignum</a>
+         by Ugljesa Jovanovic. Kotlin Multiplatform BigNum library is a pure kotlin implementation of arbitrary precision arithmetic operations. Apache License<br><br>
+        The Henchman has spent his weekend mornings and learned some things doing this. He mostly sees the internet as a blessing and still sees Elon Musk as a hero.
+        He may pay you a visit one evening if your masonry bill is overdue.<br>
