@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Plaine Sundial</title>
+    <style>
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #D0D080;
+        }
+
+        .monitor {
+            position: absolute;
+            margin: auto;
+            inset: 0;
+            z-index: 1;
+            width:95%;
+            height: 95%;
+            max-width: 960px;
+            border: 3px solid #80471C;
+            border-radius: 10mm;
+            clip-path: inset(0px 0px 0px 0px round 10mm);
+            background-color: #102010;
+            color: #009000;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            scrollbar-color:   #153015 #00000000;
+            font-family: Andale Mono, AndaleMono, monospace;
+            font-weight: 900;
+            font-size: 3cqmin;
+        }
+
+        #deLuxe {
+            position: fixed;
+            bottom: 2px;
+            right: 5px;
+            z-index: 2;
+            color: #C0C0C0;
+            font-size: 2cqmin;
+        }
+
+        #bayeux {
+            width:100%;
+            max-width: 960px;
+            background-color: #102010;
+            overflow: hidden;
+            pointer-events: auto;
+        }
+
+        input[type=text],input[type=date],input[type=time],input[type=datetime-local], select {
+            font-size: 100%;
+            box-sizing: border-box;
+            color: #00A000;
+            background-color: #204020;
+            outline: none;
+            border: 0px solid black;
+            padding: 3px;
+        }
+
+        input[type=text]:focus {
+            color: #00FF00;
+            border: 1px solid #00FF00;
+        }
+
+        fieldset {
+            border-width: 0;
+        }
+
+        .button {
+            padding: 3px;
+            background-color: #204020;
+            margin: 1px;
+         }
+
+         .button:hover {
+            text-shadow: 0px 0px 2px #009000;
+            cursor: default;
+         }
+
+         .button:active {
+            background-color: #406040;
+         }
+
+         .disabled {
+            color: #006000;
+         }
+
+         .padding {
+            padding: 5px 0px 5px 0px;
+         }
+
+         .radio {
+            padding: 5px;
+            /*color: #00A000;*/
+            background-color: #204020;
+        }
+
+        .radio:hover {
+            text-shadow: 0px 0px 2px #009000;
+            cursor: default;
+         }
+
+         .radio:active {
+            background-color: #406040;
+         }
+
+         .radiolabel {
+            cursor: default;
+         }
+
+         .checkbox {
+            padding: 5px;
+            color: #00A000;
+            background-color: #204020;
+        }
+
+        .checkbox:hover {
+            text-shadow: 0px 0px 2px #009000;
+            cursor: default;
+         }
+
+         .checkbox:active {
+            background-color: #406040;
+         }
+
+         .checkboxlabel {
+            cursor: default;
+         }
+
+        #output {
+            position: relative;
+        }
+
+        .paragraph {
+            margin: 20px 0px 20px 0px;
+        }
+
+        #cursor {
+            display:inline-block;
+            color: #008000;
+            font-weight: bold;
+            margin-left: 5px;
+            width: fit-content;
+            height: fit-content;
+            background-color: transparent;
+            animation: anim 0.3s infinite step-end; /*1sec interval indefinite loop */
+         }
+
+         @keyframes anim {
+              from, to {
+                color: transparent;
+              }
+              50% {
+                color: #008000;
+              }
+         }
+
+         .visible {
+            visibility: visible;
+         }
+
+         .hidden {
+            visibility: hidden;
+         }
+
+        .display_none {
+           display: none;
+        }
+
+         #down {
+            position: relative;
+            top: 2px;
+            left: 50%;
+            right: 50%;
+            /*display: table;*/
+        }
+
+        #lowbar {
+            position: relative;
+            pointer-events: none;
+            width: 100%;
+            /*bottom: 0px;
+            display: block;
+            overflow: auto;*/
+        }
+
+        #up {
+            position: absolute;
+            pointer-events: auto;
+            bottom: 0;
+            left: 50%;
+            right: 50%;
+            display: table;
+        }
+
+        #terminate {
+            position: absolute;
+            pointer-events: auto;
+            bottom: 0;
+            right: 2%;
+            display: table;
+        }
+
+        input:disabled {
+            color: #008000;
+        }
+
+        input:enabled {
+            color: #00FF00;
+        }
+
+        pre {
+            font-size: 40%;
+        }
+
+        a:link {
+            color: #4040FF;
+        }
+
+        a:visited {
+            color: #FF00FF;
+        }
+
+        a:hover {
+            color: #FF0000;
+        }
+    </style>
+    <script type="text/javascript">
+        function measureText(txt,font) {
+            let canvas = document.getElementById("canvas");
+            let ctxt = canvas.getContext("2d");
+            ctxt.font = font;
+            let tm = ctxt.measureText(txt);
+
+            return tm;
+        }
+
+        function clearConsole() {
+            console.clear();
+        }
+
+        function radioClicked(event) {
+            var r = event.target;
+
+            if (r.className.includes("radiolabel")) r = r.firstChild;
+
+            if (r.classList.contains("disabled")) return;
+
+            if (r.textContent == "( )") {
+                var g = r.getAttribute("name");
+                document.getElementsByName(g).forEach((elm) => {
+
+                    if (elm == r) {
+                        elm.innerHTML = "(x)";
+                    }
+                    else
+                        elm.innerHTML = "( )";
+                });
+            }
+        }
+
+        function initRadios() {
+            var elms = document.getElementsByClassName("radio");
+
+            for (i=0; i<elms.length; i++) {
+               elms[i].parentElement.addEventListener("click",radioClicked);
+            };
+        }
+
+        function checkboxClicked(event) {
+            var c = event.target;
+            if (c.className.includes("checkboxlabel")) c = c.firstChild;
+
+            if (c.textContent == "{.}")
+                c.innerHTML = "{v}";
+            else
+                c.innerHTML = "{.}";
+
+        }
+
+        function initCheckboxes() {
+            var elms = document.getElementsByClassName("checkbox");
+
+            for (i=0; i<elms.length; i++) {
+               elms[i].parentElement.addEventListener("click",checkboxClicked);
+            };
+        }
+
+
+    </script>
+</head>
+<body>
+<div id="monitor" class="monitor">
+    <div id="bayeux">
+        <h2>The Plaine Sundial Generator <span id="version"></span></h2>
+        <h3>A static web application to make plane and plain sundials</h3>
+        <div id="quick_start" class="paragraph display_none">For a quick demonstration, scroll to the bottom and click [DIAL]</div>
+        <!-- https://stackoverflow.com/questions/32777184/html-input-for-positive-whole-numbers-only-type-number -->
+        <div class="paragraph">
+            A name for the project:
+            <input id="name" name="name" type="text" list="parameters" value=""/>.
+            <datalist id="parameters">
+            </datalist>
+            The name will be used as a reference for storing the data, and as a name for downloaded files.
+        </div>
+        <div class="paragraph">
+            Geographical position of the dial. Input should be in decimal degrees. Latitude should be prefixed with
+            eiter N or S, longitude with either E or W<br>
+            <label for="latitude">Latitude: </label>
+            <input id="latitude" type="text" size="11" maxlength="11" value="N59.9394539"/>
+            <label for="longitude">Longitude: </label>
+            <input id="longitude" type="text" size="12" maxlength="12" value="E10.722508"/><br>
+        </div>
+        <div class="paragraph">
+            Horizontal orientation of a normal to the plane of the dial, aka <q>gnomon</q>.
+            Enter decimal degrees directly<br>
+            <label for="azimuth">Azimuth: </label>
+            <input id="azimuth" type="text" size="7" maxlength="7" value="221.56"/>°
+            <label for="altitude">Altitude: </label>
+            <input id="altitude" type="text" size="7" maxlength="7" value="0"/>°<br>
+            or choose a preset
+            <div class="padding">
+                <span class="button" id="east">[EAST]</span>
+                <span class="button" id="south">[SOUTH]</span>
+                <span class="button" id="west">[WEST]</span>
+                <span class="button" id="north">[NORTH]</span>
+                <span class="button" id="zenith">[ZENITH]</span>
+            </div>
+            <div class="padding">
+                <span class="button" id="enorth">[EQUATORIAL NORTH]</span>
+                <span class="button" id="esouth">[EQUATORIAL SOUTH]</span>
+            </div>
+            There is also the <a href="WallNormal/" target="_blank">WallNormal</a> app, designed to help determine
+            these measures, but it seems not to appear on some devices.
+        </div>
+        <div class="paragraph">
+            The dial depends on some slowly varying astronomical constants that should be set for a central year:
+            <input id="year" type="text" size="4" maxlength="4" value="2000"/>
+            in the expected lifespan of the dial.
+        </div>
+        <div class="paragraph">
+            A suggestion for the span of hours to be displayed on the dial. Leave empty for the maximum span of hours. <input
+                id="hour_span" type="text" size="5" maxlength="5"/>hh:mm
+
+        </div>
+        <div class="paragraph">
+            The minimum altitude of the sun above the plane of the dial. This will define a limiting circle about the gnomon
+            on the dial. <input id="min_alt_above" type="text" size="5" maxlength="5" value="10"/>° decimal degrees
+
+        </div>
+        <div class="paragraph">
+            Draw an hour-line for each
+            <nobr><span class="radiolabel"><span id="minutes_1" class="radio" name="minute_step">( )</span>1 minute</span>
+            </nobr>
+            <nobr><span class="radiolabel"><span id="minutes_3" class="radio" name="minute_step">( )</span>3 minutes</span>
+            </nobr>
+            <nobr><span class="radiolabel"><span id="minutes_5" class="radio" name="minute_step">( )</span>5 minutes</span>
+            </nobr>
+            <nobr><span class="radiolabel"><span id="minutes_10" class="radio" name="minute_step">( )</span>10 minutes</span>
+            </nobr>
+            <nobr><span class="radiolabel"><span id="minutes_15" class="radio" name="minute_step">( )</span>15 minutes</span>
+            </nobr>
+            <nobr><span class="radiolabel"><span id="minutes_20" class="radio" name="minute_step">( )</span>20 minutes</span>
+            </nobr>
+            <nobr><span class="radiolabel"><span id="minutes_30" class="radio" name="minute_step">( )</span>30 minutes</span>
+            </nobr>
+            <nobr><span class="radiolabel"><span id="minutes_60" class="radio" name="minute_step">(x)</span>60 minutes</span>
+            </nobr>
+            <nobr><span class="radiolabel"><span id="minutes_never" class="radio" name="minute_step">( )</span>no hour-lines</span>
+            </nobr>
+        </div>
+        <div class="paragraph">Use<br>
+            <nobr><span class="radiolabel"><span id="hours_arabic" class="radio"
+                                                 name="hour_symbols">(x)</span>Arabic numerals</span></nobr>
+            <nobr><span class="radiolabel"><span id="hours_roman" class="radio"
+                                                 name="hour_symbols">( )</span>Roman numerals</span></nobr>
+            <nobr><span class="radiolabel"><span id="hours_none" class="radio" name="hour_symbols">( )</span>Nothing</span>
+            </nobr>
+            to mark the full hours on the dial
+        </div>
+        <div class="paragraph">
+            Timezone meridian/offset for the dial<br>
+            <nobr><span class="radiolabel"><span id="tz_local" class="radio"
+                                                 name="tz_meridian">( )</span>Same as longitude</span></nobr>
+            <nobr><span class="radiolabel"><span id="tz_mult_15" class="radio" name="tz_meridian">(x)</span>Multiple of 15° closest to longitude</span>
+            </nobr>
+            <nobr><span class="radiolabel"><span id="tz_offset" class="radio" name="tz_meridian">( )</span>
+            Offset to GMT in hours</span><input id="tz_offset_hour" type="text" size="6" maxlength="6" disabled="true" value="00:00"/>hh:mm
+            </nobr>
+        </div>
+        <div class="paragraph">
+            Draw a day line representing a solar ecliptic longitude each
+            <nobr><span class="radiolabel"><span id="elong_5" class="radio" name="elong_step">( )</span>5°</span></nobr>
+            <nobr><span class="radiolabel"><span id="elong_10" class="radio" name="elong_step">( )</span>10°</span></nobr>
+            <nobr><span class="radiolabel"><span id="elong_15" class="radio" name="elong_step">( )</span>15°</span></nobr>
+            <nobr><span class="radiolabel"><span id="elong_30" class="radio" name="elong_step">(x)</span>30°</span></nobr>
+            <nobr><span class="radiolabel"><span id="elong_never" class="radio" name="elong_step">( )</span>no day lines</span>
+            </nobr>
+        </div>
+        <div class="paragraph">
+            Use<br>
+            <nobr><span class="radiolabel"><span id="symbols_zodiac" class="radio"
+                                                 name="zoodiac_symbols">(x)</span>Zodiac symbols</span></nobr>
+            <nobr><span class="radiolabel"><span id="symbols_abbrev" class="radio"
+                                                 name="zoodiac_symbols">( )</span>Abbreviations</span></nobr>
+            <nobr><span class="radiolabel"><span id="symbols_none" class="radio" name="zoodiac_symbols">( )</span>No symbols</span>
+            </nobr>
+            for the signs of the zodiac
+        </div>
+        <div class="paragraph">
+            <span class="checkboxlabel"><span id="clip_horizon" class="checkbox">{.}</span>Clip away part of the dial where
+                the sun is below the horizon</span>
+        </div>
+        <div class="paragraph">
+            <span class="checkboxlabel"><span id="show_eot"
+                                              class="checkbox">{.}</span>Display the Equation of Time.</span>
+            <div class="paragraph">
+                Show the minutes of EoT using<br>
+                <nobr><span class="radiolabel"><span class="radio disabled" id="eot_full_minutes"
+                                                     name="eot_fmt">( )</span>full minutes</span></nobr>
+                <nobr><span class="radiolabel"><span class="radio disabled" id="eot_half_minutes"
+                                                     name="eot_fmt">(x)</span>half minutes</span></nobr>
+                <nobr><span class="radiolabel"><span class="radio disabled" id="eot_none" name="eot_fmt">( )</span>nothing</span>
+                </nobr>
+            </div>
+            Split EoT into <input disabled="true" id="eot_n" type="text" size="2" maxlength="2"/> parts. From 5 to 20 or leave empty
+            to let the app determine a value.
+        </div>
+        <div class="paragraph">
+            Dimensions of the dial area<br>
+            Enter millimeter dimensions directly <br>
+            <label for="width">Width: </label>
+            <input id="width" type="text" size="6" maxlength="6" value="297"/>mm
+            <label for="height">Height: </label>
+            <input id="height" type="text" size="6" maxlength="6" value="210"/>mm<br>
+            or choose a preset
+            <div class="padding">
+                <span class="button" id="a3fmt">[A3]</span>
+                <span class="button" id="a4fmt">[A4]</span>
+            </div>
+            <div class="paragraph">
+                Orientation of the drawing in the area:<br>
+                <nobr><span class="radiolabel"><span id="align_horizon" class="radio" name="alignment">(x)</span>Align horizon with a side</span>
+                </nobr>
+                <nobr><span class="radiolabel"><span id="optimize_area" class="radio" name="alignment">( )</span>Largest drawing possible in area</span>
+                </nobr>
+            </div>
+        </div>
+        <div class="paragraph">
+            To mark an anniversary on the dial, enter its date and time here. The year should be in the range 1500 to 2500. Use UTC (GMT)
+            <input id="anniversary" type="datetime-local" name="date" aria-label="date" value="1814-05-17T11:00"/>
+        </div>
+        <div class="paragraph">
+            If this project was named at the top of this page, it is now time to click <span class="button" id="save">[SAVE]</span>
+            to store the input in local browser storage. Then click any of the following actions
+        </div>
+        <div id="up_anchor" class="padding">
+            <span class="button" id="pi">[π]</span>
+            <span class="button" id="eot">[E o T]</span>
+            <span class="button" id="dial">[DIAL]</span>
+            <span class="button" id="style">[STYLE]</span>
+            <span class="button" id="scad">[SCAD]</span>
+            <span class="button" id="about">[ABOUT]</span>
+            <span class="button" id="help">[HELP]</span>
+            <span class="button" id="clear">[CLR]</span>
+        </div>
+        <div class="padding">
+            <span class="button" id="down" title="Down">[v]</span>
+        </div>
+        <div id="output">
+            <span id="cursor" class="hidden">█</span>
+
+        </div>
+        <div id="lowbar">
+            <span class="button" id="up" title="Up">[ʌ]</span>
+            <span class="button" id="terminate" title="Abort">[<span style="font-size:14px">❌</span>]</span>
+        </div>
+        <spanner id="bottom"></spanner>
+    </div>
+</div>
+
+<div id="deLuxe">Monitor de Luxe</div>
+
+<div id="dummy" style="width:100mm;height:100:mm;"></div>
+<canvas id="canvas" class="hidden" width="100" height="100"></canvas>
+
+<script src="./main.js" type="text/javascript"></script>
+</body>
+</html>
